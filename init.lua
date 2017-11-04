@@ -2,7 +2,7 @@ perplayer_gamemode = { users = {} }
 
 dofile(minetest.get_modpath("perplayer_gamemode") .. "/ChatCmdBuilder.lua")
 
-function perplayer_gamemode.is_in_creative(name)
+function perplayer_gamemode.is_enabled_for(name)
 	if perplayer_gamemode.users[name] == nil then
 		return minetest.setting_getbool("creative_mode")
 	else
@@ -21,20 +21,20 @@ function perplayer_gamemode.set_creative(name, v)
 	end
 end
 
-if creative.is_in_creative then
-	creative.is_in_creative = perplayer_gamemode.is_in_creative
+if creative.is_enabled_for then
+	creative.is_enabled_for = perplayer_gamemode.is_enabled_for
 else
 	for name, def in pairs(sfinv.pages) do
 		if #name > 9 and name:sub(1, 9) == "creative:" then
 			def.is_in_nav = function(self, player, context)
-				return perplayer_gamemode.is_in_creative(player:get_player_name())
+				return perplayer_gamemode.is_enabled_for(player:get_player_name())
 			end
 		end
 	end
 
 	local old_homepage_name = sfinv.get_homepage_name
 	function sfinv.get_homepage_name(player)
-		if perplayer_gamemode.is_in_creative(player:get_player_name()) then
+		if perplayer_gamemode.is_enabled_for(player:get_player_name()) then
 			return "creative:all"
 		else
 			return "sfinv:crafting"
