@@ -11,7 +11,7 @@ function perplayer_gamemode.is_in_creative_mode(name)
 end
 function perplayer_gamemode.can_take_damage(name)
 	if perplayer_gamemode.creative[name] == nil then
-		return minetest.setting_getbool("enable_damage")
+		return false
 	else
 		return perplayer_gamemode.damage[name]
 	end
@@ -99,13 +99,11 @@ perplayer_gamemode.ChatCmdBuilder.new("gamemode", function(cmd)
 
 	cmd:sub(":username :value", function(name, username, value)
 		if minetest.check_player_privs(name, { gamemode_super = true }) then
-			local v = is_creative(value)
-			perplayer_gamemode.set_creative(username, v)
-			if v then
-				return true, "Set " .. username .. "'s gamemode to creative"
-			else
-				return true, "Set " .. username .. "'s gamemode to survival"
-			end
+			local isCreative, isDamage = is_creative(value), is_damage(value)
+			perplayer_gamemode.set_creative(username, isCreative)
+			perplayer_gamemode.set_damage(username, isDamage)
+			return true, "Set gamemode to " .. GamemodeNames[isCreative][isDamage]
+				.. ". Creative = " .. tostring(isCreative) .. ", damage = " .. tostring(isDamage)
 		else
 			return false, "Missing privs: gamemode_super"
 		end
@@ -120,3 +118,11 @@ minetest.register_on_player_hpchange(function (player, hp_change)
 	end
 	return hp_change
 end, true)
+
+if not minetest.setting_getbool("enable_damage") then
+	minetest.log("warning", "Damage is disabled, meaning that "
+		.. GamemodeNames[true][true]
+		.. " and "
+		.. GamemodeNames[false][true]
+		.. " modes will not work as intended.")
+end
