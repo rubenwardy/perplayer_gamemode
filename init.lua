@@ -4,7 +4,7 @@ dofile(minetest.get_modpath("perplayer_gamemode") .. "/ChatCmdBuilder.lua")
 
 function perplayer_gamemode.is_enabled_for(name)
 	if perplayer_gamemode.users[name] == nil then
-		return minetest.setting_getbool("creative_mode")
+		return minetest.settings:get_bool("creative_mode")
 	else
 		return perplayer_gamemode.users[name]
 	end
